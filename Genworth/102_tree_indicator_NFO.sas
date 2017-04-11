@@ -1,0 +1,83 @@
+options mprint;
+OPTIONS OBS=MAX;
+%include "/PROJECTS/GENWORTH_2016/02_CODES/library.sas";
+%include "/PROJECTS/GENWORTH_2016/02_CODES/common_macros.sas";
+%include "/PROJECTS/GENWORTH_2016/02_CODES/modeling_macros.sas";
+%include "/PROJECTS/GENWORTH_2016/02_CODES/preModeling_macros.sas";
+%include "/PROJECTS/GENWORTH_2016/02_CODES/uni_macros.sas";
+
+data modeling_data_final;
+set mreg.modeling_data_final;
+IF /*NUM_DECISIONS=1 AND */IFA_GROUP_STATE_PROD_FAWP=1
+AND TOTL_COMMUNICATED_INCR_RATE>=4 
+then tree_NFO1 = 1;
+else tree_NFO1 = 0;
+IF DECISION_STAGE<=2 AND IFA_GROUP_STATE_PROD_FAWP=1
+AND TOTL_COMMUNICATED_INCR_RATE>=4 
+then tree_NFO1B = 1;
+else tree_NFO1B = 0;
+IF policy_age_2<=4 and cnt_fpo_prev1=0 AND IFA_GROUP_STATE_PROD_FA=0
+AND TOTL_COMMUNICATED_INCR_RATE>=4 and shared_policy=1 and decision_stage<2
+then tree_nfo1c=1;
+else tree_nfo1c=0;
+
+IF /*NUM_DECISIONS=1 AND */IFA_GROUP_STATE_PROD_FAWP=0 AND
+STATE_AZ=0
+then tree_NFO2 = 1;
+else tree_NFO2 = 0;
+
+/*IF NUM_DECISIONS>=2 THEN tree_NFO3=1;*/
+/*ELSE TREE_NFO3=0;*/
+IF /*NUM_DECISIONS<=1 AND*/ IFA_GROUP_STATE_PROD_FAWP=0
+AND STATE_MD=0 AND RATE_INCR>=4 
+then tree_NFO3 = 1;
+else tree_NFO3 = 0;
+
+IF DECISION_STAGE<=2 AND IFA_GROUP_STATE_PROD_FAWP=0
+AND STATE_MD=0 AND RATE_INCR>=4 
+then tree_NFO3B = 1;
+else tree_NFO3B = 0;
+IF TOTL_COMMUNICATED_INCR_RATE>=4 AND POLICY_AGE_2<4
+then tree_NFO4 = 1;
+else tree_NFO4 = 0;
+IF STATE_OR=0 AND STATE_AZ=0
+then tree_NFO5 = 1;
+else tree_NFO5 = 0;
+IF ZAGG_PDIADIET < 0.5  AND  BAL_AGENCYFIRSTMTG > 6.5  AND  BINARY_NT_TRANS < 0.008203558  AND  DECISION_STAGE > 1.5  AND  POLICY_AGE_2 < 2.5 
+THEN TREE_NFO6=1;
+ELSE TREE_NFO6=0;
+IF RATE_INCR_PRE > 0.5  AND  RATE_INCR > 5.5  AND  C210EBI < 7.5  AND  SEV_DIAB_TRANS < 1129.0704935  AND  RATE_INCR_AFFORD < 5.5  AND  POLICY_AGE_2 > 2.5 
+THEN TREE_NFO7=1;
+ELSE TREE_NFO7=0;
+
+/* add tree_nfo8 */
+IF RATE_INCR>=6 and POLICYHOLDER_AGE>=8
+THEN TREE_NFO8=1;
+ELSE TREE_NFO8=0;
+/* add tree_nfo9 */
+IF RATE_INCR>=6 and BINARY_DIAB_TRANS>=0.19
+THEN TREE_NFO9=1;
+ELSE TREE_NFO9=0;
+if state_partnership =1 and IFA_GROUP_STATE_PROD_FA =0 then tree_nfo10=0;
+else tree_nfo10=1;
+
+
+run;
+
+
+
+data mreg.modeling_data_final;
+set modeling_data_final;
+run;
+
+PROC FREQ DATA=modeling_data_final;
+TABLES TREE_NFO1*NFO_IND/LIST;
+PROC FREQ DATA=modeling_data_final;
+TABLES TREE_NFO1B*NFO_IND/LIST;
+PROC FREQ DATA=modeling_data_final;
+TABLES TREE_NFO2*NFO_IND/LIST;
+PROC FREQ DATA=modeling_data_final;
+TABLES TREE_NFO3*NFO_IND/LIST;
+PROC FREQ DATA=modeling_data_final;
+TABLES TREE_NFO10*NFO_IND/LIST;
+

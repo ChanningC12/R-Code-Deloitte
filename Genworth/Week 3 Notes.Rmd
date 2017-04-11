@@ -1,0 +1,18 @@
+Week 3 knitr Document
+============================================================
+
+#### Email Presentation Tips  
+1. Try to make your proposal a Y/N question
+
+#### [Rpubs.com](http://rpubs.com)  
+- Publish R Markdown to share with people
+
+#### DO's and DONT's
+- Do not do things by hand, it is not reproducible
+- Do not use GUIs, hard for others to reproduce
+- Use version control software
+- Always set seed for random numbers
+
+```{r}
+sessionInfo()
+```

@@ -1,0 +1,93 @@
+---
+title: "Full Pay Predicted Probability Comparison"
+date: "Feb 13, 2017"
+output: html_document
+---
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+library(dplyr)
+library(plyr)
+library(ggplot2)
+library(knitr)
+################# QC Scoring ########################
+FULLPAY = read.csv("../Desktop/Probability Comparison_FullPay_0213.csv")
+
+# Beyond 3 digit indicator
+FULLPAY$ind = ifelse(FULLPAY$PROB_DIFF_ABS>=0.001,1,0)
+```
+
+### Overview of the comparison dataset
+###### Note that:
+###### 1. **PROB_FULLPAY_SCORED** is the scored probability from Full Pay Random Forest model  
+###### 2. **PROB_FULLPAY** is calculated through PROB_FULLPAY = 1 - PROB_NFO - PROB_RBO from the NFO/RBO Random Forest model
+###### 3. PROB_DIFF = PROB_FULLPAY_SCORED - PROB_FULLPAY
+###### 4. PROB_DIFF_ABS is the absolute value of PROB_DIFF
+```{r,echo=FALSE}
+kable(head(FULLPAY[,1:ncol(FULLPAY)-1],10),align = "c",format = "markdown")
+```
+
+### Summary statistics of probability difference
+#### 1. Summary table
+```{r,echo=FALSE}
+summary(FULLPAY$PROB_DIFF,digits = 3)
+```
+#### 2. Decile table
+```{r,echo=FALSE}
+prob_diff_quantile = quantile(FULLPAY$PROB_DIFF,probs=seq(0,1,by = 0.1))
+kable(as.data.frame(prob_diff_quantile),align = "c")
+```
+
+### Summary statistics of probability difference (absolute difference)
+#### 1. Summary table
+```{r,echo=FALSE}
+summary(FULLPAY$PROB_DIFF_ABS,digits = 3)
+```
+#### 2. Decile table
+```{r,echo=FALSE}
+prob_diff_quantile_abs = quantile(FULLPAY$PROB_DIFF_ABS,probs=seq(0,1,by = 0.1))
+kable(as.data.frame(prob_diff_quantile_abs),align = "c")
+```
+
+```{r,echo=FALSE}
+FULLPAY_ind = count(FULLPAY$ind)
+FULLPAY_ind$Description = ifelse(FULLPAY_ind$x==0,"|Diff|<0.001","|Diff|>=0.001")
+FULLPAY_ind$Percentage = FULLPAY_ind$freq / sum(FULLPAY_ind$freq)
+FULLPAY_ind_new = FULLPAY_ind[,c(3,2,4)]
+
+FULLPAY$ind_2 = ifelse(FULLPAY$PROB_DIFF_ABS>=0.01,1,0)
+FULLPAY_ind_2 = count(FULLPAY$ind_2)
+FULLPAY_ind_2$Description = ifelse(FULLPAY_ind_2$x==0,"|Diff|<0.01","|Diff|>=0.01")
+FULLPAY_ind_2$Percentage = FULLPAY_ind_2$freq / sum(FULLPAY_ind_2$freq)
+FULLPAY_ind_2_new = FULLPAY_ind_2[,c(3,2,4)]
+```
+
+### Difference frequency table - Full Pay Probability
+#### 1.indicate whether the absolute difference is beyond **three** decimals
+```{r,echo=FALSE}
+kable(FULLPAY_ind_new,align="c")
+```
+
+#### 2.indicate whether the absolute difference is beyond **two** decimals
+```{r,echo=FALSE}
+kable(FULLPAY_ind_2_new,align="c")
+```
+
+### Histogram plot on Probability Difference
+```{r,echo=FALSE}
+hist(FULLPAY$PROB_DIFF,col="grey",breaks = 100,main="Full Pay Probability Differennce",
+     xlab="Probability Difference")
+```
+
+### Boxplot on Probability Difference
+```{r,echo=FALSE}
+boxplot(FULLPAY$PROB_DIFF,main="Full Pay Probability Difference",horizontal = T)
+```
+
+
+
+
+
+
+
+
+

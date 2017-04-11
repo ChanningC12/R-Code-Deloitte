@@ -1,0 +1,82 @@
+---
+title: "RF Scoring Difference (JMP and SAS EG)"
+date: "Feb 07, 2017"
+output: html_document
+---
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+library(dplyr)
+library(plyr)
+################# QC Scoring ########################
+NFO_score = read.csv("../../../QC_NFO_0207.csv")
+RBO_score = read.csv("../../../QC_RBO_0207.csv")
+
+# Create diff variables
+NFO_score$Diff = NFO_score$PROB_NFO - NFO_score$NFO_1_0126_02_JMP
+RBO_score$Diff = RBO_score$PROB_RBO - RBO_score$Prob_RBO_JMP
+
+# Beyond 3 digit indicator
+NFO_score$ind = ifelse(abs(NFO_score$Diff)>=0.001,1,0)
+RBO_score$ind = ifelse(abs(RBO_score$Diff)>=0.001,1,0)
+```
+### Summary statistics of scoring difference - NFO
+```{r,echo=FALSE}
+summary(NFO_score$Diff,digits = 3)
+```
+### Summary statistics of scoring difference - RBO
+```{r,echo=FALSE}
+summary(RBO_score$Diff,digits = 3)
+```
+
+```{r,echo=FALSE}
+NFO_ind = count(NFO_score$ind)
+RBO_ind = count(RBO_score$ind)
+NFO_ind$Desc = ifelse(NFO_ind$x==0,"Diff<0.001","Diff>=0.001")
+RBO_ind$Desc = ifelse(RBO_ind$x==0,"Diff<0.001","Diff>=0.001")
+NFO_ind$Percentage = NFO_ind$freq / sum(NFO_ind$freq)
+RBO_ind$Percentage = RBO_ind$freq / sum(RBO_ind$freq)
+NFO_ind_new = NFO_ind[,c(3,2,4)]
+RBO_ind_new = RBO_ind[,c(3,2,4)]
+```
+
+### Difference frequency table - NFO
+#### (indicate whether the absolute difference is beyond three decimals)
+```{r,echo=FALSE}
+NFO_ind_new
+```
+
+### Difference frequency table - RBO
+#### (indicate whether the absolute difference is beyond three decimals)
+```{r,echo=FALSE}
+RBO_ind_new
+```
+
+### Histogram plot on Scoring Difference - NFO
+```{r,echo=FALSE}
+hist(NFO_score$Diff,col="grey",breaks = 100,main="NFO Scoring Differennce")
+```
+
+### Histogram plot on Scoring Difference - RBO
+```{r,echo=FALSE}
+hist(RBO_score$Diff,col="grey",breaks = 100,main="RBO Scoring Differennce")
+```
+
+### Boxplot on Scoring Difference - NFO
+```{r,echo=FALSE}
+boxplot(NFO_score$Diff,main="NFO Scoring Difference")
+```
+
+### Boxplot on Scoring Difference - RBO
+```{r,echo=FALSE}
+boxplot(RBO_score$Diff,main="RBO Scoring Difference")
+```
+
+
+
+
+
+
+
+
+
+
